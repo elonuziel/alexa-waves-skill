@@ -1,0 +1,47 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "slots": [],
+          "name": "GetSurfReportIntent",
+          "samples": [
+            "get the surf report",
+            "surf report",
+            "what are the waves like",
+            "how are the waves",
+            "what\u0027s the surf like",
+            "give me the surf report",
+            "check the waves",
+            "how big are the waves",
+            "what\u0027s the wave height",
+            "wind and waves",
+            "what are the conditions"
+          ]
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        }
+      ],
+      "types": [],
+      "invocationName": "my waves"
+    }
+  }
+}
