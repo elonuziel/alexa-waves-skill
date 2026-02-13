@@ -1,15 +1,24 @@
 /* *
- * Alexa Skill – Beit Yanai Surf Report
+ * Alexa Skill – Surf / Wave Report
  * Uses Open-Meteo Marine & Weather APIs (no API key needed).
+ *
+ * ✏️  CONFIGURE YOUR SPOT BELOW  ✏️
  * */
 const Alexa = require('ask-sdk-core');
 const axios = require('axios');
 
-// ── API URLs ────────────────────────────────────────────────
+// ── YOUR CONFIGURATION ──────────────────────────────────────
+// Change these values to match your surf spot:
+const SPOT_NAME = 'Beit Yanai';        // Display name of your beach/spot
+const LATITUDE  = 32.38;               // Latitude  (decimal degrees)
+const LONGITUDE = 34.86;               // Longitude (decimal degrees)
+// ─────────────────────────────────────────────────────────────
+
+// ── API URLs (built from config above) ──────────────────────
 const MARINE_URL =
-    'https://marine-api.open-meteo.com/v1/marine?latitude=32.38&longitude=34.86&hourly=wave_height&timezone=auto';
+    `https://marine-api.open-meteo.com/v1/marine?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=wave_height&timezone=auto`;
 const WEATHER_URL =
-    'https://api.open-meteo.com/v1/forecast?latitude=32.38&longitude=34.86&hourly=wind_speed_10m,wind_direction_10m&timezone=auto';
+    `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=wind_speed_10m,wind_direction_10m&timezone=auto`;
 
 // ── Helpers ─────────────────────────────────────────────────
 const KMH_TO_KNOTS = 0.539957;
@@ -53,7 +62,7 @@ const LaunchRequestHandler = {
     },
     handle(handlerInput) {
         const speakOutput =
-            'Welcome to the Beit Yanai surf report! You can say "get the surf report" to hear current conditions.';
+            `Welcome to the ${SPOT_NAME} surf report! You can say "get the surf report" to hear current conditions.`;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -93,7 +102,7 @@ const GetSurfReportIntentHandler = {
             const windDirection = degreesToCardinal(windDirDeg);
 
             const speakOutput =
-                `Currently at Beit Yanai, the waves are ${waveHeight} meters high ` +
+                `Currently at ${SPOT_NAME}, the waves are ${waveHeight} meters high ` +
                 `and the wind is blowing at ${windSpeedKnots} knots, direction ${windDirection}.`;
 
             return handlerInput.responseBuilder
@@ -119,7 +128,7 @@ const HelpIntentHandler = {
     },
     handle(handlerInput) {
         const speakOutput =
-            'You can say "get the surf report" to hear the current wave height and wind conditions at Beit Yanai.';
+            `You can say "get the surf report" to hear the current wave height and wind conditions at ${SPOT_NAME}.`;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -210,5 +219,5 @@ exports.handler = Alexa.SkillBuilders.custom()
         IntentReflectorHandler,
     )
     .addErrorHandlers(ErrorHandler)
-    .withCustomUserAgent('beit-yanai-surf-report/v1.0')
+    .withCustomUserAgent('alexa-waves/v1.0')
     .lambda();
