@@ -36,6 +36,22 @@
           ]
         },
         {
+          "slots": [],
+          "name": "GetForecastIntent",
+          "samples": [
+            "today's forecast",
+            "get the forecast",
+            "what's the forecast",
+            "what's the weather today",
+            "how's the weather",
+            "forecast for today",
+            "daily forecast",
+            "give me the forecast",
+            "weather forecast",
+            "what's the weather like today"
+          ]
+        },
+        {
           "name": "AMAZON.NavigateHomeIntent",
           "samples": []
         }

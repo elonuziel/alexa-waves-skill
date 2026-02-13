@@ -8,8 +8,9 @@ Ask Alexa something like:
 
 > "Alexa, open my waves"
 > "Get the surf report"
+> "Today's forecast"
 
-She'll respond with the current wave height (meters) and wind speed/direction for the location you configure.
+She'll respond with real-time **wave height** & **wind conditions**, or a daily **weather forecast** (temperature, precipitation chance, and max winds) for the location you configure.
 
 ---
 
@@ -72,7 +73,7 @@ lambda/
 |------|-------|---------|
 | **Location** | `lambda/index.js` — top of file | Change `SPOT_NAME`, `LATITUDE`, `LONGITUDE` |
 | **Invocation name** | `interactionModels/custom/en-US.json` | Change the `invocationName` field |
-| **Sample utterances** | `interactionModels/custom/en-US.json` | Add/edit the `samples` array under `GetSurfReportIntent` |
+| **Sample utterances** | `interactionModels/custom/en-US.json` | Add/edit the `samples` arrays under `GetSurfReportIntent` or `GetForecastIntent` |
 | **Skill display name** | `skill.json` | Change the `name` under `publishingInformation` |
 
 ## Credits

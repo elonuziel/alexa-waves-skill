@@ -19,6 +19,9 @@ const MARINE_URL =
     `https://marine-api.open-meteo.com/v1/marine?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=wave_height&timezone=auto`;
 const WEATHER_URL =
     `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&hourly=wind_speed_10m,wind_direction_10m&timezone=auto`;
+const FORECAST_URL =
+    `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}` +
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=auto`;
 
 // ── Helpers ─────────────────────────────────────────────────
 const KMH_TO_KNOTS = 0.539957;
@@ -43,6 +46,30 @@ function getCurrentHourIndex(times) {
 /**
  * Convert a meteorological wind-direction in degrees to a cardinal label.
  */
+/**
+ * Convert a WMO weather code to a human-friendly description.
+ */
+function weatherCodeToDescription(code) {
+    const descriptions = {
+        0: 'clear sky',
+        1: 'mostly clear', 2: 'partly cloudy', 3: 'overcast',
+        45: 'foggy', 48: 'depositing rime fog',
+        51: 'light drizzle', 53: 'moderate drizzle', 55: 'dense drizzle',
+        56: 'light freezing drizzle', 57: 'dense freezing drizzle',
+        61: 'slight rain', 63: 'moderate rain', 65: 'heavy rain',
+        66: 'light freezing rain', 67: 'heavy freezing rain',
+        71: 'slight snowfall', 73: 'moderate snowfall', 75: 'heavy snowfall',
+        77: 'snow grains',
+        80: 'slight rain showers', 81: 'moderate rain showers', 82: 'violent rain showers',
+        85: 'slight snow showers', 86: 'heavy snow showers',
+        95: 'thunderstorm', 96: 'thunderstorm with slight hail', 99: 'thunderstorm with heavy hail',
+    };
+    return descriptions[code] || 'unknown conditions';
+}
+
+/**
+ * Convert a meteorological wind-direction in degrees to a cardinal label.
+ */
 function degreesToCardinal(deg) {
     const directions = [
         'north', 'north-northeast', 'northeast', 'east-northeast',
@@ -62,11 +89,11 @@ const LaunchRequestHandler = {
     },
     handle(handlerInput) {
         const speakOutput =
-            `Welcome to the ${SPOT_NAME} surf report! You can say "get the surf report" to hear current conditions.`;
+            `Welcome to the ${SPOT_NAME} surf report! You can say "get the surf report" for current conditions, or "today's forecast" for the daily forecast.`;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
-            .reprompt('Say "surf report" to hear the latest conditions.')
+            .reprompt('Say "surf report" or "today\'s forecast".')
             .getResponse();
     },
 };
@@ -119,6 +146,47 @@ const GetSurfReportIntentHandler = {
     },
 };
 
+const GetForecastIntentHandler = {
+    canHandle(handlerInput) {
+        return (
+            Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+            Alexa.getIntentName(handlerInput.requestEnvelope) === 'GetForecastIntent'
+        );
+    },
+    async handle(handlerInput) {
+        try {
+            const forecastRes = await axios.get(FORECAST_URL);
+            const daily = forecastRes.data.daily;
+
+            // Today is the first element (index 0)
+            const weatherCode = daily.weather_code[0];
+            const tempMax = daily.temperature_2m_max[0];
+            const tempMin = daily.temperature_2m_min[0];
+            const precipChance = daily.precipitation_probability_max[0];
+            const windMax = (daily.wind_speed_10m_max[0] * KMH_TO_KNOTS).toFixed(1);
+
+            const condition = weatherCodeToDescription(weatherCode);
+
+            const speakOutput =
+                `Today's forecast for ${SPOT_NAME}: ${condition}, ` +
+                `with a high of ${tempMax} degrees and a low of ${tempMin} degrees Celsius. ` +
+                `There is a ${precipChance}% chance of precipitation ` +
+                `and winds up to ${windMax} knots.`;
+
+            return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+        } catch (error) {
+            console.log('Error fetching forecast data:', JSON.stringify(error));
+            const speakOutput =
+                'Sorry, I was unable to retrieve the forecast right now. Please try again later.';
+            return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+        }
+    },
+};
+
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return (
@@ -128,7 +196,8 @@ const HelpIntentHandler = {
     },
     handle(handlerInput) {
         const speakOutput =
-            `You can say "get the surf report" to hear the current wave height and wind conditions at ${SPOT_NAME}.`;
+            `You can say "get the surf report" to hear the current wave height and wind conditions at ${SPOT_NAME}, ` +
+            `or say "today's forecast" for the daily weather forecast.`;
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -212,6 +281,7 @@ exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
         GetSurfReportIntentHandler,
+        GetForecastIntentHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         FallbackIntentHandler,
